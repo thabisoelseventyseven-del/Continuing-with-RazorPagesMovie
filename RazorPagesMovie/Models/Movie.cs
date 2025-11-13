@@ -32,4 +32,6 @@ public class Movie
     public string Category { get; set; }
 
     public bool IsUpcoming { get; set; }
+
+    public string ImageUrl { get; set; }
 }

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RazorPagesMovie.Data;
 using RazorPagesMovie.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,46 +12,47 @@ namespace RazorPagesMovie.Pages.Movies
 {
     public class IndexModel : PageModel
     {
-        private readonly RazorPagesMovie.Data.RazorPagesMovieContext _context;
+        private readonly RazorPagesMovieContext _context;
 
-        public IndexModel(RazorPagesMovie.Data.RazorPagesMovieContext context)
+        public IndexModel(RazorPagesMovieContext context)
         {
             _context = context;
         }
 
-        public IList<Movie> Movie { get;set; } = default!;
+        public IList<Movie> MovieList { get; set; } = default!;
 
         [BindProperty(SupportsGet = true)]
         public string? SearchString { get; set; }
 
         public SelectList? Genres { get; set; }
-
+        public List<Movie> Movie { get; private set; }
         [BindProperty(SupportsGet = true)]
         public string? MovieGenre { get; set; }
+
         public async Task OnGetAsync()
         {
-            // <snippet_search_linqQuery>
+            // Get distinct genres for dropdown filter
             IQueryable<string> genreQuery = from m in _context.Movie
                                             orderby m.Genre
                                             select m.Genre;
-            // </snippet_search_linqQuery>
 
             var movies = from m in _context.Movie
                          select m;
 
+            // Filter by search string (title)
             if (!string.IsNullOrEmpty(SearchString))
             {
                 movies = movies.Where(s => s.Title.Contains(SearchString));
             }
 
+            // Filter by selected genre
             if (!string.IsNullOrEmpty(MovieGenre))
             {
                 movies = movies.Where(x => x.Genre == MovieGenre);
             }
 
-            // <snippet_search_selectList>
             Genres = new SelectList(await genreQuery.Distinct().ToListAsync());
-            // </snippet_search_selectList>
+
             Movie = await movies.ToListAsync();
         }
     }
