@@ -28,4 +28,8 @@ public class Movie
     [StringLength(5)]
     [Required]
     public string Rating { get; set; } = string.Empty;
+
+    public string Category { get; set; }
+
+    public bool IsUpcoming { get; set; }
 }
