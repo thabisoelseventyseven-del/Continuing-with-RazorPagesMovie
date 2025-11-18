@@ -1,0 +1,26 @@
+﻿@page "{plan?}"
+@model RazorPagesMovie.Pages.Subscriptions.SubscribeModel
+@{
+    ViewData["Title"] = "Subscribe";
+}
+
+<h2>Confirm Your Subscription</h2>
+
+@if (Model.Plan == null)
+{
+    <p class="text-danger">No plan selected. Please go back and choose a subscription plan.</p>
+}
+else
+{
+    <div class="card p-3">
+        <h3>@Model.PlanDisplayName</h3>
+        <p>@Model.PlanDescription</p>
+        <p><strong>R@Model.PlanPrice.ToString("F2") / month</strong></p>
+
+        <form method="post">
+            <input type="hidden" asp-for="Plan" />
+            <button type="submit" class="btn btn-success">Subscribe</button>
+            <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+}
