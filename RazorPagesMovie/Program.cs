@@ -1,34 +1,56 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RazorPagesMovie.Data;
 using RazorPagesMovie.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+
+// 1. Add Database + Identity
+
 builder.Services.AddDbContext<RazorPagesMovieContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("RazorPagesMovieContext") ?? throw new InvalidOperationException("Connection string 'RazorPagesMovieContext' not found.")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("RazorPagesMovieContext")
+        ?? throw new InvalidOperationException("Connection string 'RazorPagesMovieContext' not found.")
+    ));
+
+// Add Identity (Login/Register/Logout)
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+})
+.AddEntityFrameworkStores<RazorPagesMovieContext>();
+
+// Razor Pages
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
+
+
+// 2. Seed Movie Data  
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
     SeedData.Initialize(services);
 }
-// Configure the HTTP request pipeline.
+
+
+// 3. Middleware (Order matters!)
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
-app.UseRouting();
+// Identity needs these:
+app.UseAuthentication();   // <-- required for login
+app.UseAuthorization();    // <-- required for access control
 
-app.UseAuthorization();
+app.UseRouting();
 
 app.MapStaticAssets();
 app.MapRazorPages()
